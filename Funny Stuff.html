@@ -1,0 +1,119 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Rant or Praise Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f4f4f4;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    select, textarea, button {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      font-size: 16px;
+      width: 80%;
+      max-width: 500px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    #aiOutput {
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 80%;
+      max-width: 500px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Rant or Praise Generator</h1>
+  <label for="tone">Choose Tone:</label>
+  <select id="tone">
+    <option value="rant">Rant</option>
+    <option value="praise">Praise</option>
+  </select>
+  <label for="topic">Enter Topic:</label>
+  <textarea id="topic" rows="4" placeholder="Type the topic here..."></textarea>
+  <button onclick="generateResponse()">Generate Response</button>
+  <div id="aiOutput">The AI's response will appear here...</div>
+  <script>
+    const API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent";
+    const API_KEY = "AIzaSyCp41JO0yuCEEEC2mGU0bvEFgwpuybpsaY"; // Replace with your actual API key
+
+    async function generateResponse() {
+      const tone = document.getElementById('tone').value;
+      const topic = document.getElementById('topic').value;
+      
+      if (!topic.trim()) {
+        alert("Please enter a topic.");
+        return;
+      }
+
+      const lengthGuides = {
+        short: "Keep it short, about 2-3 sentences.",
+        medium: "Make it a little longer, about 4-5 sentences.",
+        long: "Write a lot, about 6-8 sentences."
+      };
+
+      const prompt = tone === 'praise' ? 
+        `Write a fun and funny praise in Eddie's style about the topic: "${topic}". 
+        ${lengthGuides.medium}
+        The praise should sound like Eddie, funny and a bit silly, but still kind of nice. Include an opening and a closing sentence.` :
+        `Write a funny rant in Eddie's style about the topic: "${topic}". 
+        ${lengthGuides.medium}
+        The rant should sound like Eddie, funny and a little annoyed, but still silly. Include an opening and a closing sentence.`;
+
+      try {
+        const requestBody = {
+          contents: [{
+            parts: [{
+              text: prompt
+            }]
+          }]
+        };
+
+        const response = await fetch(`${API_ENDPOINT}?key=${API_KEY}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        const output = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received from AI.";
+        document.getElementById('aiOutput').textContent = output;
+
+      } catch (error) {
+        console.error('Error:', error);
+        document.getElementById('aiOutput').textContent = 'Oops! Something went wrong. Try again.';
+      }
+    }
+  </script>
+<elevenlabs-convai agent-id="XX6FDlYgLEBdkTSIRh7d"></elevenlabs-convai><script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>
+</body>
+</html>
